@@ -3,9 +3,9 @@ A deep learning based Viterbi algorithm for symbol detection, based on the paper
 
 N. Shlezinger, N. Farsad, Y. C. Eldar, and A. J. Goldsmith. 
 
-“ViterbiNet: A deep learning based Viterbi algorithm for symbol detection”. 
+“**ViterbiNet: A deep learning based Viterbi algorithm for symbol detection**”. 
 
-arXiv preprint, arXiv:1905.10750, 2019.
+*arXiv preprint*, arXiv:1905.10750, 2019.
 
 
 The implementation of ViterbiNet consists of two functions:
