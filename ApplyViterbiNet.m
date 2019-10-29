@@ -21,9 +21,9 @@ function v_fXhat = ApplyViterbiNet(v_fY, net, GMModel, s_nConst, s_nMemSize)
 
 s_nStates = s_nConst^s_nMemSize;
 % Use network to compute likelihood function
-m_fpS_Y = predict(net,fShapeY(v_fY));
+m_fpS_Y = predict(net,num2cell(v_fY'));
 % Compute output PDF
-v_fpY = pdf(GMModel, v_fYtest');
+v_fpY = pdf(GMModel, v_fY');
 % Compute likelihoods
 m_fLikelihood = (m_fpS_Y .* v_fpY)*s_nStates;        
 % Apply Viterbi output layer
