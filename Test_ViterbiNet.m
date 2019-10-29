@@ -23,8 +23,7 @@ s_fNumFrames = s_fTrainSize/s_fFrameSize;
 v_nCurves   = [...          % Curves
     1 ...                   % Deep Viterbi - perfect CSI
     1 ....                  % Deep Viterbi - CSI uncertainty
-    1 ...                   % Viterbi - perfect CSI
-    1 ...                   % Viterbi - CSI uncertainty
+    1 ...                   % Viterbi algorithm
     ];
 
 
@@ -33,8 +32,7 @@ s_nCurves = length(v_nCurves);
 v_stProts = strvcat(  ...
     'ViterbiNet, perfect CSI', ...
     'ViterbiNet, CSI uncertainty',...
-    'Viterbi, perfect CSI', ...
-    'Viterbi, CSI uncertainty');
+    'Viterbi algorithm');
 
 s_nMixtureSize = s_nStates;
 
@@ -47,10 +45,6 @@ for eIdx=1:length(v_fExps)
     v_fChannel = exp(-v_fExps(eIdx)*(0:(s_nMemSize-1)));
     
     m_fSER = zeros(length(v_nCurves),length(v_fSigWdB));
-    
-    % Noisy channels for CSI uncertainty
-    m_fNoisyChanneltest = repmat(fliplr(v_fChannel),s_fTestSize,1) + ...
-        sqrt(s_fEstErrVar)*randn(s_fTestSize,s_nMemSize);  
     
     
     % Generate training labels
@@ -105,11 +99,10 @@ for eIdx=1:length(v_fExps)
             
         end
         
-        % Model-based Viterbi
-        if((v_nCurves(3)+v_nCurves(4))>0)
+        % Model-based Viterbi algorithm
+        if(v_nCurves(3)==1)
             
-            m_fLikelihood3 = zeros(s_fTestSize,s_nStates);
-            m_fLikelihood4 = zeros(s_fTestSize,s_nStates);
+            m_fLikelihood = zeros(s_fTestSize,s_nStates);
             % Compute coditional PDF for each state
             for ii=1:s_nStates
                 v_fX = zeros(s_nMemSize,1);
@@ -119,15 +112,12 @@ for eIdx=1:length(v_fExps)
                     Idx = floor(Idx/s_nConst);
                 end
                 v_fS = 2*(v_fX - 0.5*(s_nConst+1));
-                m_fLikelihood3(:,ii) = normpdf(v_fYtest' -  fliplr(v_fChannel)*v_fS,0,s_fSigmaW);
-                m_fLikelihood4(:,ii) = normpdf(v_fYtest' -  m_fNoisyChanneltest*v_fS,0,s_fSigmaW);
+                m_fLikelihood(:,ii) = normpdf(v_fYtest' -  fliplr(v_fChannel)*v_fS,0,s_fSigmaW);
             end
             % Apply Viterbi detection based on computed likelihoods
-            v_fXhat3 = v_fViterbi(m_fLikelihood3, s_nConst, s_nMemSize);
-            v_fXhat4 = v_fViterbi(m_fLikelihood4, s_nConst, s_nMemSize);
+            v_fXhat = v_fViterbi(m_fLikelihood, s_nConst, s_nMemSize);
             % Evaluate error rate
-            m_fSER(3,mm) = mean(v_fXhat3 ~= v_fXtest);
-            m_fSER(4,mm) = mean(v_fXhat4 ~= v_fXtest);
+            m_fSER(3,mm) = mean(v_fXhat ~= v_fXtest);
         end
         
         % Display SNR index
@@ -142,8 +132,7 @@ m_fSERAvg = m_fSERAvg/length(v_fExps);
 
 
 %% Display results
-v_stPlotType = strvcat( '-rs', '--go', '-.b^',  ':kx',...
-    '-g<', '-g*', '-m>', '-mx', '-c^', '-cv');
+v_stPlotType = strvcat( '-rs', '--go', '-.b^');
 
 v_stLegend = [];
 fig1 = figure;
